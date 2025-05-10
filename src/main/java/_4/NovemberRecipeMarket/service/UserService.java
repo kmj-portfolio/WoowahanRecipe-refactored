@@ -1,6 +1,6 @@
 package _4.NovemberRecipeMarket.service;
 
-import _4.NovemberRecipeMarket.domain.UserRole;
+import _4.NovemberRecipeMarket.domain.enums.UserRole;
 import _4.NovemberRecipeMarket.domain.dto.user.*;
 import _4.NovemberRecipeMarket.domain.entity.User;
 import _4.NovemberRecipeMarket.exception.AppException;

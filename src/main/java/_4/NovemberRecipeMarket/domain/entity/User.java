@@ -1,6 +1,6 @@
 package _4.NovemberRecipeMarket.domain.entity;
 
-import _4.NovemberRecipeMarket.domain.UserRole;
+import _4.NovemberRecipeMarket.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,14 +35,6 @@ public class User extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-
-    /*
-        TODO: SHOULD USER HAVE A LIST OF THEIR ORDERS?
-        @Builder.Default //?
-        @OneToMany(mappedBy = "user")
-        private List<Order> orders = new ArrayList<>();
-     */
-
 
     public void updateUser(String password, String name, String address,
                            String email,String phoneNumber, String birthdate) {

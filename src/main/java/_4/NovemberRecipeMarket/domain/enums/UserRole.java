@@ -1,4 +1,4 @@
-package _4.NovemberRecipeMarket.domain;
+package _4.NovemberRecipeMarket.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

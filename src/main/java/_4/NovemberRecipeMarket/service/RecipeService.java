@@ -1,6 +1,6 @@
 package _4.NovemberRecipeMarket.service;
 
-import _4.NovemberRecipeMarket.domain.UserRole;
+import _4.NovemberRecipeMarket.domain.enums.UserRole;
 import _4.NovemberRecipeMarket.domain.dto.recipe.*;
 import _4.NovemberRecipeMarket.domain.dto.recipeItem.RecipeItemGetResponse;
 import _4.NovemberRecipeMarket.domain.dto.recipeItem.RecipeItemRequest;

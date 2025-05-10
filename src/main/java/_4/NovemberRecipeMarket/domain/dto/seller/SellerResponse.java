@@ -1,6 +1,5 @@
 package _4.NovemberRecipeMarket.domain.dto.seller;
 
-import _4.NovemberRecipeMarket.domain.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
