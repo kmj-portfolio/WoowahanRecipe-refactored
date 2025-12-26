@@ -63,11 +63,11 @@ public class SellerService {
     }
 
     // cannot update businessRegNum or password
-    public SellerResponse  update(Long id, String username, SellerUpdateRequest request) {
+    public SellerResponse update(Long id, String username, SellerUpdateRequest request) {
         Seller seller = checkForPermission(id, username);
 
         // 바꾸려는 이메일과 같은 이메일이 DB에 없는지 확인
-        sellerRepository.findByUsername(request.getEmail())
+        sellerRepository.findByEmail(request.getEmail())
                 .filter(existingSeller -> !existingSeller.getId().equals(seller.getId()))
                 .ifPresent(duplicateEmail -> {
                     throw new AppException(ErrorCode.DUPLICATE_EMAIL);

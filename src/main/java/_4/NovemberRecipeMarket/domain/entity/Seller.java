@@ -3,6 +3,7 @@ package _4.NovemberRecipeMarket.domain.entity;
 import _4.NovemberRecipeMarket.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -31,6 +32,7 @@ public class Seller extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
+    @Builder
     public Seller(String username, String password, String companyName, String businessRegNum, String phoneNumber,
                   String address, String email) {
         this.username = username;
@@ -40,7 +42,7 @@ public class Seller extends BaseEntity{
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.email = email;
-        this.userRole = UserRole.READY;
+        this.userRole = UserRole.SELLER;
     }
 
     public void updateSellerInfo(String username, String companyName,
