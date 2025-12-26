@@ -1,21 +1,21 @@
 package _4.NovemberRecipeMarket.service;
 
 import _4.NovemberRecipeMarket.domain.dto.cart.*;
-import _4.NovemberRecipeMarket.domain.entity.Cart;
-import _4.NovemberRecipeMarket.domain.entity.CartItem;
-import _4.NovemberRecipeMarket.domain.entity.Item;
-import _4.NovemberRecipeMarket.domain.entity.User;
+import _4.NovemberRecipeMarket.domain.dto.cart.request.CartItemDeleteRequest;
+import _4.NovemberRecipeMarket.domain.dto.cart.response.*;
+import _4.NovemberRecipeMarket.domain.dto.order.OrderCreateRequest;
+import _4.NovemberRecipeMarket.domain.entity.*;
 import _4.NovemberRecipeMarket.exception.AppException;
 import _4.NovemberRecipeMarket.exception.ErrorCode;
-import _4.NovemberRecipeMarket.repository.CartItemRepository;
-import _4.NovemberRecipeMarket.repository.CartRepository;
-import _4.NovemberRecipeMarket.repository.ItemRepository;
-import _4.NovemberRecipeMarket.repository.UserRepository;
+import _4.NovemberRecipeMarket.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -23,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+
     private final CartItemRepository cartItemRepository;
+
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     public CartCreateResponse createCart(String username) {
         User user = validateUserByUsername(username);
@@ -42,27 +44,66 @@ public class CartService {
         return "장바구니를 삭제했습니다.";
     }
 
-    public Page<CartItemForListResponse> getCartByUser(String username, Pageable pageable) {
+    public CartDetailsResonse getCartDetailsByUser(String username, Pageable pageable) {
         User user = validateUserByUsername(username);
         Cart cart = validateCart(user);
-        return cartItemRepository.findAllByCart(cart, pageable).map(this::toListDto);
+
+        int totalCost = 0;
+        int numberOfUniqueItems = cart.getItemList().size();
+
+        // convert List<CartItem> -> List<CartItemsDto> : Wrap CartItem in DTO
+        List<CartItemDto> cartItemDtoList = new ArrayList<>();
+        for (CartItem cartItem : cart.getItemList()) {
+            cartItemDtoList.add(new CartItemDto(cartItem.getItem().getId(), cartItem.getQuantity()));
+            totalCost += cartItem.getQuantity() * cartItem.getItem().getPrice();
+        }
+
+        // calculate 배달비
+        int deliveryFee = 0;
+        if (totalCost < 40000) {
+            deliveryFee = 3000;
+        }
+
+        return CartDetailsResonse.builder()
+                .cartOrderList(cartItemDtoList)
+                .deliveryCost(deliveryFee)
+                .itemCost(totalCost)
+                .totalCost(totalCost + deliveryFee)
+                .numberOfUniqueItems(numberOfUniqueItems)
+                .build();
     }
 
-    public CartItemResponse addToCart(CartItemRequest request, String username) {
+    // 상품 장바구니 등록
+    public CartItemResponse addOneItemToCart(CartItemDto request, String username) {
         User user = validateUserByUsername(username);
-        Cart cart = validateCart(user);
+        Cart cart = validateCart(user); // cart 가 존재하는 지 확인. 없으면 새로 생성
+
         Item item = validateItem(request.getItemId());
-        checkStock(item, request.getQuantity());
-        CartItem cartItem = new CartItem(cart, item, request.getQuantity());
-        cart.addToCart(cartItem);
+
+        addToCart(cart, item, request.getQuantity());
+
         return new CartItemResponse(item.getId(), item.getItemName(), request.getQuantity(),
                 "상품이 장바구니에 추가되었습니다.");
+    }
+
+    public List<CartItemDto> addMultipleItemsToCart(List<CartItemDto> cartItemDtoList, String username) {
+        User user = validateUserByUsername(username);
+        Cart cart = validateCart(user); // cart 가 존재하는 지 확인. 없으면 새로 생성
+
+        List<CartItemDto> cartItemDtos = new ArrayList<>();
+        for (CartItemDto cartItemDto: cartItemDtoList) {
+            Item item = validateItem(cartItemDto.getItemId());
+            addToCart(cart, item, cartItemDto.getQuantity());
+            new CartItemDto(item.getId(), cartItemDto.getQuantity());
+            cartItemDtos.add(cartItemDto);
+        }
+        return cartItemDtos;
     }
 
     // 상품 삭제
     public CartItemDeleteResponse removeFromCart(CartItemDeleteRequest deleteRequest, String username) {
         User user = validateUserByUsername(username);
-        Cart cart = validateCart(user);
+        Cart cart = validateCart(user); // cart 가 존재하는 지 확인. 없으면 새로 생성
         Item item = validateItem(deleteRequest.getItemId());
 
         CartItem cartItem = hasCartItem(cart, item);
@@ -70,28 +111,101 @@ public class CartService {
         return new CartItemDeleteResponse(item.getItemName());
     }
 
-    public CartItemResponse updateQuantity(CartItemRequest request, String username) {
+    public CartItemResponse updateQuantity(CartItemDto request, String username) {
         User user = validateUserByUsername(username);
         Cart cart = validateCart(user);
         Item item = validateItem(request.getItemId());
         CartItem cartItem = hasCartItem(cart, item);
 
         int newQuantity = request.getQuantity();
-        checkStock(item, newQuantity);
+        checkIfEnoughStock(item, newQuantity);
         cartItem.updateQuantity(newQuantity);
         return new CartItemResponse(item.getId(), item.getItemName(), cartItem.getQuantity(),
-                "수량을 변경했습니다..");
+                "수량을 변경했습니다.");
     }
 
-    private CartItemForListResponse toListDto(CartItem cartItem) {
-        return CartItemForListResponse.builder()
-                .cartId(cartItem.getCart().getId())
-                .itemId(cartItem.getItem().getId())
-                .itemName(cartItem.getItem().getItemName())
-                .price(cartItem.getItem().getPrice())
-                .quantity(cartItem.getQuantity())
-                .imagePath("") //TODO: ADD PRODUCT IMAGE
-                .build();
+    // clear cart
+    public String clearCart(String username) {
+        User user = validateUserByUsername(username);
+        cartRepository.deleteByUser(user);
+        return "카트내 모든 상품이 삭제되었습니다.";
+    }
+
+    // 카트에 있는 OrderCreateRequest로 변환하기
+    @Transactional
+    public List<OrderCreateRequest> orderCartItems(CartItemOrderListDto request, String username) {
+        // 사용자 + 장바구니 검증하기
+        User user = validateUserByUsername(username);
+        Cart cart = validateCart(user);
+
+        if (request.getCartItemDtoList() == null || request.getCartItemDtoList().isEmpty()) {
+            throw new AppException(ErrorCode.SELECT_ORDER_ITEM, "주문할 상품이 없습니다.");
+        }
+
+        List<OrderCreateRequest> itemsToOrder = new ArrayList<>();
+
+        for (CartItemDto dto : request.getCartItemDtoList()) {
+            Long itemId = dto.getItemId();
+            int orderQuantity = dto.getQuantity();
+
+            if (orderQuantity <= 0) {
+                throw new AppException(ErrorCode.INVALID_QUANTITY, "0보다 작은 수량은 주문할 수 없습니다.");
+            }
+
+            Item item = itemRepository.findById(itemId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+            CartItem cartItem = cartItemRepository.findByCartAndItem(cart, item)
+                    .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+
+            // 장바구니에 넣은 수량이 음수거나, 재고보다 많이 주문하려 하면 막기
+            if (orderQuantity > cartItem.getItem().getStock()) {
+                throw new AppException(ErrorCode.INVALID_QUANTITY, "재고 수량보다 많이 주문할 수 없습니다.");
+            }
+
+            itemsToOrder.add(new OrderCreateRequest(cartItem.getItem().getId(), cartItem.getQuantity()));
+        }
+
+        return itemsToOrder;
+    }
+
+    // ------ private methods -------//
+
+    private void checkIfEnoughStock(Item item, int quantity) {
+        if (item.getStock() < quantity) {
+            throw new AppException(ErrorCode.NOT_ENOUGH_STOCK, "재고가 충분하지 않습니다.");
+        }
+    }
+
+    private void addToCart(Cart cart, Item item, int quantityRequested) {
+        // check enough stock
+        checkIfEnoughStock(item, quantityRequested);
+
+        // 카트에 넣으려는 상품이 이미 있는지 확인
+        Optional<CartItem> optionalCartItem = cartItemRepository.findByCartAndItem(cart, item);
+
+        if (optionalCartItem.isPresent()) {
+            CartItem cartItem = optionalCartItem.get();
+
+            //아이템 stock 충분한지 확인 (충분하지 않으면 error)
+            int totalQuantity = cartItem.getQuantity() + quantityRequested;
+            checkIfEnoughStock(item, totalQuantity);
+
+            cartItem.updateQuantity(totalQuantity);
+
+        } else {
+            int cnt = quantityRequested;
+            checkIfEnoughStock(item, cnt);
+            CartItem cartItem = new CartItem(cart, item, cnt);
+            cartItemRepository.save(cartItem);
+            cart.addToCart(cartItem); // cart가 가지고 있는 cart item list에 추가
+        }
+    }
+
+
+    private CartItem validateCartItem(Long cartIemId) {
+        return cartItemRepository.findById(cartIemId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
     }
 
     private CartItem hasCartItem(Cart cart, Item item) {
@@ -99,15 +213,9 @@ public class CartService {
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
     }
 
-    private void checkStock(Item item, int quantity) {
-        if (item.getStock() < quantity) {
-            throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
-        }
-    }
-
     private Cart validateCart(User user) {
         return cartRepository.findCartByUser(user)
-                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+                .orElseGet(() -> cartRepository.save(new Cart(user)));
     }
 
     private Item validateItem(Long itemId) {

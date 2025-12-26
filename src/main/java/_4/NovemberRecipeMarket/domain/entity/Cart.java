@@ -26,7 +26,6 @@ public class Cart {
     public Cart(User user) {
         this.user = user;
     }
-
     public void addToCart(CartItem item) {
         itemList.add(item);
     }

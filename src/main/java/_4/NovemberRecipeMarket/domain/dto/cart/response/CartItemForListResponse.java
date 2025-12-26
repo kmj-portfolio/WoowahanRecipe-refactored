@@ -1,4 +1,4 @@
-package _4.NovemberRecipeMarket.domain.dto.cart;
+package _4.NovemberRecipeMarket.domain.dto.cart.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
