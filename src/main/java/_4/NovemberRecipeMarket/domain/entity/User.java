@@ -44,6 +44,7 @@ public class User extends BaseEntity{
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.birthdate = birthdate;
+        this.userRole = UserRole.USER;
     }
 
 }
