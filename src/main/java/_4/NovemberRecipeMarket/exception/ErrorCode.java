@@ -36,8 +36,17 @@ public enum ErrorCode {
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 장바구니 입니다."),
 
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니에 존재하지 않는 상품입니다."),
-    INVALID_QUANTITY(HttpStatus.CONFLICT, "0 이상의 수량만 가능합니다.");
+    INVALID_QUANTITY(HttpStatus.CONFLICT, "0 이상의 수량만 가능합니다."),
 
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
+    SELECT_ORDER_ITEM(HttpStatus.FORBIDDEN, "주문할 상품을 선택해주세요"),
+
+    FORBIDDEN(HttpStatus.FORBIDDEN, "사용자 정보와 일치하지 않음"),
+
+    // payment
+    MISMATCH_AMOUNT(HttpStatus.CONFLICT, "결제 금액이 주문 금액과 일치하지 않습니다."),
+    INVALID_PAYMENT(HttpStatus.CONFLICT, "유효하지 않은 결제 요청입니다."),
+    DUPLICATE_PAYMENT(HttpStatus.CONFLICT, "이미 다른 주문에서 처리된 결제입니다.");
 
     private HttpStatus httpStatus;
     private String message;

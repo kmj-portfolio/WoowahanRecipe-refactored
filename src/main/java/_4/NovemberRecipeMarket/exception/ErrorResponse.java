@@ -1,14 +1,13 @@
 package _4.NovemberRecipeMarket.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-public class ErrorResponse {
+@AllArgsConstructor
+public class ErrorResponse extends RuntimeException {
+
     private ErrorCode errorCode;
     private String message;
 
-    public ErrorResponse(ErrorCode errorCode) {
-        this.errorCode = errorCode;
-        message =errorCode.getMessage();
-    }
 }
