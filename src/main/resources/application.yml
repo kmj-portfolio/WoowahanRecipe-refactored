@@ -4,19 +4,13 @@ spring:
       matching-strategy: ant_path_matcher
 
   datasource:
-    #    driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: localhost
-    #    username: root
-    #    password: password
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:tcp://localhost/~/market
-    username: sa
-    password:
-
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: localhost
+      username: root
+      password: password
 
   jpa:
     show-sql: true
-    #database: mysql
     hibernate.ddl-auto: update
     properties:
       hibernate:
@@ -24,9 +18,7 @@ spring:
 jwt:
   token:
     secret: secret.aa.bb.cc
-#  redis:
-#    host: localhost
-#    port: 6379
+
 cloud:
   aws:
     credentials:
