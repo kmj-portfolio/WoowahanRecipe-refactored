@@ -2,12 +2,10 @@ package _4.NovemberRecipeMarket.config;
 
 import _4.NovemberRecipeMarket.domain.dto.Response;
 import _4.NovemberRecipeMarket.exception.ErrorCode;
-import _4.NovemberRecipeMarket.exception.ErrorResponse;
 import _4.NovemberRecipeMarket.security.JwtExceptionFilter;
-import _4.NovemberRecipeMarket.security.JwtTokenFilter;
+import _4.NovemberRecipeMarket.security.JwtFilter;
 import _4.NovemberRecipeMarket.security.JwtTokenUtils;
-import _4.NovemberRecipeMarket.service.SellerService;
-import _4.NovemberRecipeMarket.service.UserService;
+import _4.NovemberRecipeMarket.security.UserRolesFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,8 +35,7 @@ public class SecurityConfig {
     private String secretKey;
 
     private final JwtTokenUtils jwtTokenUtils;
-    private final UserService userService;
-    private final SellerService sellerService;
+    private final UserRolesFilter userRolesFilter;
 
     private final String[] POST_PERMIT = {
             "/api/v1/users/join",
@@ -61,6 +58,10 @@ public class SecurityConfig {
             "/users/my",
             "users/my/**",
             "/users/logout",
+
+            //sellers
+            //"/api/v1/sellers/**",
+            //"/sellers/",
             "/sellers/my/**"
     };
 
@@ -86,14 +87,12 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         httpSecurity
-                .addFilterBefore(new JwtTokenFilter(secretKey, jwtTokenUtils),
+                .addFilterBefore(new JwtFilter(secretKey, jwtTokenUtils, userRolesFilter),
                         UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtExceptionFilter(), JwtTokenFilter.class);
+                .addFilterBefore(new JwtExceptionFilter(), JwtFilter.class);
 
         httpSecurity.exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
-                    // TODO: Might need to redirect
-                    //response.sendRedirect("/login");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Return 401 Unauthorized
                     makeErrorResponse(response, ErrorCode.INVALID_PERMISSION);
                 })
@@ -116,7 +115,7 @@ public class SecurityConfig {
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writeValue(response.getWriter(), Response.error("ERROR", new ErrorResponse(errorCode)));
+        objectMapper.writeValue(response.getWriter(), Response.error(errorCode.getMessage()));
     }
 
 }
