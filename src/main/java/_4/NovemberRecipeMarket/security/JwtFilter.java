@@ -18,10 +18,11 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class JwtTokenFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 
     private final String secretKey;
     private final JwtTokenUtils jwtTokenUtils;
+    private final UserRolesFilter userRolesFilter;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,6 +36,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     log.info("token retrieved");
                 }
             }
+
         } catch (Exception e) {
             log.error("error found");
             filterChain.doFilter(request, response);
@@ -55,9 +57,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         log.info("token valid");
         String username = jwtTokenUtils.getUsername(token, secretKey);
         String userRole = jwtTokenUtils.getUserRole(token, secretKey);
+        log.info("userRole from token: {}", userRole);
+
+        String role = userRolesFilter.validateAndGetRole(username, userRole);
+        log.info("retrieved userRole");
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority(userRole)));
+                new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority(role)));
 
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
