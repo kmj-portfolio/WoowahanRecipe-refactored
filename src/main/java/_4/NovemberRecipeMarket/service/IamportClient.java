@@ -3,10 +3,9 @@ package _4.NovemberRecipeMarket.service;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.Getter;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
