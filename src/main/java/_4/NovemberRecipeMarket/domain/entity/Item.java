@@ -1,5 +1,7 @@
 package _4.NovemberRecipeMarket.domain.entity;
 
+import _4.NovemberRecipeMarket.exception.AppException;
+import _4.NovemberRecipeMarket.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +22,9 @@ public class Item extends BaseEntity {
     private String itemName;
     private int price;
     private int stock;
+    private String imagePath;
 
+    // TODO: set imagepath
     public Item(Seller seller, String itemName, int price, int stock) {
         this.seller = seller;
         this.itemName = itemName;
@@ -32,5 +36,20 @@ public class Item extends BaseEntity {
         this.itemName = itemName;
         this.price = price;
         this.stock = stock;
+    }
+
+    public boolean isEnoughStock(int quantity) {
+        return stock >= quantity;
+    }
+
+    public void removeStock(int quantity) {
+        if (stock - quantity < 0) {
+            throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
+        }
+        stock -= quantity;
+    }
+
+    public void increaseStock(int quantity) {
+        stock += quantity;
     }
 }
