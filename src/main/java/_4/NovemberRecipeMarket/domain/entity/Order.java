@@ -35,6 +35,7 @@ public class Order {
     private OrderStatus orderStatus;
 
     @Setter
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderedItemList = new ArrayList<>();
 

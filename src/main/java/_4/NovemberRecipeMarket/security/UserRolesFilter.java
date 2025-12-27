@@ -1,7 +1,6 @@
 package _4.NovemberRecipeMarket.security;
 
 
-import _4.NovemberRecipeMarket.domain.dto.user.UserResponse;
 import _4.NovemberRecipeMarket.domain.entity.Seller;
 import _4.NovemberRecipeMarket.domain.entity.User;
 import _4.NovemberRecipeMarket.exception.AppException;

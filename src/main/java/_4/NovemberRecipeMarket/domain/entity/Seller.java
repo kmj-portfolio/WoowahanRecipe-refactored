@@ -3,6 +3,7 @@ package _4.NovemberRecipeMarket.domain.entity;
 import _4.NovemberRecipeMarket.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
