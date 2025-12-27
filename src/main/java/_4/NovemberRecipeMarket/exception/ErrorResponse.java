@@ -9,5 +9,4 @@ public class ErrorResponse extends RuntimeException {
 
     private ErrorCode errorCode;
     private String message;
-
 }
