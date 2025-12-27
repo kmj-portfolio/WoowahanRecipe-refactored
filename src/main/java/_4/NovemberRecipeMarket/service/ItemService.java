@@ -67,7 +67,7 @@ public class ItemService {
 
     // 재료 페이지에서 재료 검색
     public Page<ItemListResponse> searchByKeyword(String keyword, Pageable pageable) {
-        Page<Item> items = itemRepository.findByNameContaining(keyword, pageable);
+        Page<Item> items = itemRepository.findByItemNameContaining(keyword, pageable);
         if (items.getSize() == 0) {
             throw new AppException(ErrorCode.ITEM_NOT_FOUND, ErrorCode.ITEM_NOT_FOUND.getMessage());
         }

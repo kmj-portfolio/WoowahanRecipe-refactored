@@ -22,6 +22,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("SELECT i FROM Item i WHERE i.id = :itemId")
     Optional<Item> findByIdWithLock(@Param("itemId") Long itemId);
 
-    Page<Item> findByNameContaining(String keyword, Pageable pageable);
+    Page<Item> findByItemNameContaining(String keyword, Pageable pageable);
 
 }
