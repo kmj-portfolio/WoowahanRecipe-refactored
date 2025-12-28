@@ -3,15 +3,24 @@ spring:
     path-match:
       matching-strategy: ant_path_matcher
 
+  servlet:
+    encoding:
+      force-response: true
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
   datasource:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: localhost
+      url: jdbc:mysql://localhost:3306/market_db
       username: root
       password: password
 
   jpa:
     show-sql: true
-    hibernate.ddl-auto: update
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
