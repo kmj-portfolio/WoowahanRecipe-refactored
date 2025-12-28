@@ -28,7 +28,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-//	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// JWT Dependency
@@ -47,7 +46,6 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 	// QueryDSL
-	// Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"

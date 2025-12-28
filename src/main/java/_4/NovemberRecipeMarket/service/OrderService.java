@@ -82,12 +82,14 @@ public class OrderService {
             throw new AppException(ErrorCode.FORBIDDEN, "본인의 주문만 결제할 수 있습니다.");
         }
 
-        // 이미 결제된 주문이면 바로 반환
+        // 이미 결제 완료 처리된 주문인지 확인
         if (order.isPaid()) {
-            if (order.getImpUid().equals(impUid)) {
+
+            // 요청한 imp_uid가 주문의 imp_uid와 같다면 바로 반환
+            if (order.getImpUid() != null && order.getImpUid().equals(impUid)) {
                 return toOrderCreateResponse(order);
             }
-            // 다른 IMP_UID라면 에러
+            // 주문의 imp_uid가 없거나, 다른 imp_uid라면 에러
             throw new AppException(ErrorCode.INVALID_PAYMENT);
         }
 
