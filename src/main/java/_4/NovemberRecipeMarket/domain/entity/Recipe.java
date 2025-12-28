@@ -4,6 +4,7 @@ import _4.NovemberRecipeMarket.exception.AppException;
 import _4.NovemberRecipeMarket.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Recipe extends BaseEntity{

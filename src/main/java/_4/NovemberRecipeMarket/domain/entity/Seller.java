@@ -11,6 +11,7 @@ import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE seller SET deleted_date = current_timestamp WHERE seller_id = ?")
