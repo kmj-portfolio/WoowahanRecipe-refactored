@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -107,8 +109,13 @@ public class OrderService {
         // 결제 정보 업데이트 (impUid & 상태 변경)
         order.markPaid(impUid);
 
+        // Item Id 순서대로 LOCK 획득하도록 SORT 하기
+        List<OrderItem> sortedOrderItems = order.getOrderedItemList().stream()
+                .sorted(Comparator.comparing(orderItem -> orderItem.getItem().getId()))
+                .collect(Collectors.toList());
+
         // 재고 차감 (비관적 락 사용)
-        for (OrderItem orderItem : order.getOrderedItemList()) {
+        for (OrderItem orderItem : sortedOrderItems) {
             Long itemId = orderItem.getItem().getId();
             Item lockedItem = itemRepository.findByIdWithLock(itemId)
                     .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
@@ -121,7 +128,7 @@ public class OrderService {
         Cart cart = cartRepository.findCartByUser(user)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
 
-        for (OrderItem orderItem : order.getOrderedItemList()) {
+        for (OrderItem orderItem : sortedOrderItems) {
             CartItem cartItem = cartItemRepository.findByCartAndItem(cart, orderItem.getItem())
                     .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 

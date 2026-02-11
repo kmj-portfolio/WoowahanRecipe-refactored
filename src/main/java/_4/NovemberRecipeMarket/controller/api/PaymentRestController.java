@@ -4,8 +4,8 @@ import _4.NovemberRecipeMarket.domain.dto.Response;
 import _4.NovemberRecipeMarket.domain.dto.order.OrderCreateResponse;
 import _4.NovemberRecipeMarket.domain.dto.order.PaymentCompleteRequest;
 import _4.NovemberRecipeMarket.exception.AppException;
-import _4.NovemberRecipeMarket.service.OrderService;
 import _4.NovemberRecipeMarket.service.IamportClient;
+import _4.NovemberRecipeMarket.service.order.OrderPaymentFacade;
 import org.springframework.security.core.Authentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class PaymentRestController {
 
     private final IamportClient iamportClient;
-    private final OrderService orderService;
+    private final OrderPaymentFacade orderPaymentFacade;
 
 
     // 결제 후 주문 확정 및 재고 차감
@@ -39,7 +39,7 @@ public class PaymentRestController {
         try {
 
             // 결제 검증 + 주문 확정
-            OrderCreateResponse response = orderService.finalizeOrderAfterPayment(
+            OrderCreateResponse response = orderPaymentFacade.finalizeOrderAfterPayment(
                     request.getOrderId(), request.getImpUid(), paidAmount, username);
             return Response.success(response);
 
