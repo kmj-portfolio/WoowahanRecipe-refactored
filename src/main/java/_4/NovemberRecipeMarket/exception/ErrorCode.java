@@ -46,7 +46,9 @@ public enum ErrorCode {
     // payment
     MISMATCH_AMOUNT(HttpStatus.CONFLICT, "결제 금액이 주문 금액과 일치하지 않습니다."),
     INVALID_PAYMENT(HttpStatus.CONFLICT, "유효하지 않은 결제 요청입니다."),
-    DUPLICATE_PAYMENT(HttpStatus.CONFLICT, "이미 다른 주문에서 처리된 결제입니다.");
+    DUPLICATE_PAYMENT(HttpStatus.CONFLICT, "이미 다른 주문에서 처리된 결제입니다."),
+
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "잠시 후 다시 시도해주세요.");
 
     private HttpStatus httpStatus;
     private String message;
